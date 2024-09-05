@@ -6,6 +6,7 @@ class Vertice:
         self.rotulo = rotulo
         self.grau = grau
         self.relacoes = relacoes
+        self.list_vizinhos: list[list[int]] = []
 
     def __str__(self) -> str:
         return str(self.relacoes)
@@ -36,12 +37,7 @@ class Grafo:
         return self.grafo[vertice - 1].rotulo
 
     def vizinhos(self, vertice: int) -> list[int]:
-        vizinhos: list[int] = []
-        for vizinho, peso in enumerate(self.grafo[vertice - 1].relacoes):
-            if peso != Grafo.nao_existe:
-                vizinhos.append(vizinho)
-
-        return vizinhos
+        return self.lista_vizinhos[vertice - 1]
 
     def peso(self, v1: int, v2: int) -> float:
         return self.grafo[v1].relacoes[v2]
@@ -50,8 +46,8 @@ class Grafo:
         # para melhorar legibilidade
         @dataclass
         class Aresta:
-            vertice1: int
-            vertice2: int
+            v1: int
+            v2: int
             peso: float
 
         with open(caminho_arquivo, 'r') as arquivo:
@@ -64,6 +60,9 @@ class Grafo:
                     tag = "vertices"
                     numero_de_vertices = int(linha.split()[1])
                     rotulos = ['' for _ in range(numero_de_vertices)]
+                    self.lista_vizinhos = [
+                        [] for _ in range(numero_de_vertices)
+                    ]
 
                 elif "*edges" in linha:
                     tag = "edges"
@@ -90,7 +89,9 @@ class Grafo:
                 )
 
             for aresta in arestas:
-                self.grafo[aresta.vertice1].relacoes[aresta.vertice2] = aresta.peso
+                self.grafo[aresta.v1] \
+                    .relacoes[aresta.v2] = aresta.peso
+                self.lista_vizinhos[aresta.v1].append(aresta.v2 + 1)
 
             self.qtd_arestas = len(arestas)
 
@@ -99,7 +100,7 @@ grafo = Grafo('arquivo.txt')
 print(grafo.qtdVertices())
 print(grafo.qtdArestas())
 print(grafo.grau(1))
-print(grafo.vizinhos(3))
+print(grafo.vizinhos(1))
 print(grafo.peso(1,2))
 print(grafo.grafo)
 
