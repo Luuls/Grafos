@@ -22,6 +22,7 @@ class Grafo:
     def __init__(self, caminho_arquivo: str) -> None:
         self.grafo: list[Vertice] = []
         self.qtd_arestas: int
+        self.lista_vizinhos: list[list[int]]
         self.__ler_arquivo(caminho_arquivo)
 
     def qtdVertices(self) -> int:
@@ -41,6 +42,9 @@ class Grafo:
 
     def peso(self, v1: int, v2: int) -> float:
         return self.grafo[v1].relacoes[v2]
+
+    def haAresta(self, v1: int, v2: int) -> bool:
+        return self.grafo[v1 - 1].relacoes[v2 - 1] != Grafo.nao_existe
 
     def __ler_arquivo(self, caminho_arquivo: str) -> None:
         # para melhorar legibilidade
@@ -89,9 +93,14 @@ class Grafo:
                 )
 
             for aresta in arestas:
+                # opera simetricamente, pois o grafo é não-dirigido
                 self.grafo[aresta.v1] \
                     .relacoes[aresta.v2] = aresta.peso
+                self.grafo[aresta.v2] \
+                    .relacoes[aresta.v1] = aresta.peso
+
                 self.lista_vizinhos[aresta.v1].append(aresta.v2 + 1)
+                self.lista_vizinhos[aresta.v2].append(aresta.v1 + 1)
 
             self.qtd_arestas = len(arestas)
 
@@ -102,6 +111,9 @@ print(grafo.qtdArestas())
 print(grafo.grau(1))
 print(grafo.vizinhos(1))
 print(grafo.peso(1,2))
+print(grafo.haAresta(1, 2))
+print(grafo.haAresta(2, 3))
+print(grafo.haAresta(3, 1))
 print(grafo.grafo)
 
 for i in range(grafo.qtdVertices()):
