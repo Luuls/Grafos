@@ -103,12 +103,13 @@ class Grafo:
             self.qtd_arestas = len(self.arestas)
 
 
-grafo = Grafo('arquivo.txt')
 """
+grafo = Grafo('arquivo.txt')
+
 print(grafo.qtdVertices())
 print(grafo.qtdArestas())
 print(grafo.grau(1))
-print(grafo.vizinhos(1))
+print(grafo.vizinhos(0))
 print(grafo.peso(1,2))
 print(grafo.haAresta(1, 2))
 print(grafo.haAresta(2, 3))
