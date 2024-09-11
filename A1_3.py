@@ -75,10 +75,9 @@ def buscar_ciclo_euleriano(caminho_arquivo: str):
 
     if eh_ciclo_euleriano:
         print('1')
-        print(", ".join(str(item[0]) for item in ciclo), end='')
+        print(", ".join(str(item[0]) for item in ciclo))
     else:
         print('0')  
-
 
 
 
