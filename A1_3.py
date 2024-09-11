@@ -74,7 +74,10 @@ def buscar_ciclo_euleriano(caminho_arquivo: str):
     eh_ciclo_euleriano, ciclo = buscar_subciclo_euleriano(grafo, vertice, arestas_visitadas)
 
     if eh_ciclo_euleriano:
-        print(f'1\n{[", ".join(str(ciclo[i])) for i in range(len(ciclo))]}')
+        print('1')
+        print(", ".join(str(item[0]) for item in ciclo), end='')
+    else:
+        print('0')  
 
 
 
