@@ -1,5 +1,10 @@
 from dataclasses import dataclass
 
+@dataclass
+class Aresta:
+    v1: int
+    v2: int
+    peso: float
 
 class Vertice:
     def __init__(self, rotulo: str, grau: int, relacoes: list[float]):
@@ -14,12 +19,6 @@ class Vertice:
 
     def __repr__(self) -> str:
         return self.__str__()
-
-@dataclass
-class Aresta:
-    v1: int
-    v2: int
-    peso: float
 
 class Grafo:
 
@@ -102,20 +101,29 @@ class Grafo:
 
             self.qtd_arestas = len(self.arestas)
 
+    def obterArestasSemRepeticao(self):
+        # Retorna todas as arestas do grafo, considerando que (3,4) é igual a (4,3)
+        arestas = []
+        for l, vertice in enumerate(self.grafo):  # `vertice` é um objeto `Vertice`
+            for c, peso in enumerate(vertice.relacoes):  # Acessa as relações (pesos)
+                # Verifica se existe uma aresta entre l e c (peso != infinito)
+                if self.haAresta(l + 1, c + 1) and (c + 1, l + 1) not in arestas:
+                    arestas.append((l + 1, c + 1))
+        return arestas[:]
+
 
 """
 grafo = Grafo('arquivo.txt')
-
+print(grafo.obterArestasSemRepeticao())
 print(grafo.qtdVertices())
 print(grafo.qtdArestas())
 print(grafo.grau(1))
-print(grafo.vizinhos(0))
+print(grafo.vizinhos(1))
 print(grafo.peso(1,2))
 print(grafo.haAresta(1, 2))
 print(grafo.haAresta(2, 3))
 print(grafo.haAresta(3, 1))
 print(grafo.grafo)
-
 for i in range(grafo.qtdVertices()):
     print(grafo.rotulo(i + 1))
 """

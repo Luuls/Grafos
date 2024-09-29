@@ -1,84 +1,68 @@
 from grafo import Grafo
+import random
 
-def buscar_subciclo_euleriano(grafo: Grafo, vertice: int, arestas_visitadas: dict):
-    
-    def arestas_vizinhas_foram_visitadas(vertice: int, vizinhos: list[int]):
-        # Quantidade de arestas visitadas no que diz respeito às arestas que se ligam ao vértice
-        qtd_arestas_visitadas: int = 0
-        for vizinho in vizinhos:
-            try:
-                if arestas_visitadas[(vertice, vizinho - 1)] == True:
-                    qtd_arestas_visitadas += 1
-            except:
-                if arestas_visitadas[(vizinho - 1, vertice)] == True:
-                    qtd_arestas_visitadas += 1
-            if qtd_arestas_visitadas == len(vizinhos):
-                return True
-        return False
-    
-    def seleciona_aresta_nao_visitada(arestas_visitadas: dict) -> tuple:
-        for aresta, visitada_bool in arestas_visitadas.items():
-            if not visitada_bool:
-                return aresta
-    
-    def vertices_do_ciclo_com_arestas_vizinhas_nao_visitadas(grafo: Grafo, ciclo: list[list[int]], arestas_visitadas: dict):
-        for i in range(len(ciclo)):
-            for vertice in ciclo[i]:
-                for vizinho in grafo.vizinhos(vertice + 1):
-                    try:
-                        if arestas_visitadas[(vertice, vizinho - 1)] == False:
-                            yield vertice
-                    except:
-                        if arestas_visitadas[(vizinho - 1, vertice)] == False:
-                            yield vertice
-
-
-    ciclo: list[list[int]] = [[]]
-    ciclo[0].append(vertice)
-    vertice_tmp: int = vertice
-    
+def buscarSubcicloEuleriano(grafo: Grafo, v: int, arestas: list) -> list:
+        
+    # define o vertice inicial
+    t = v
+    ciclo = [t]
     while True:
+        # pega todas arestas que estão ligadas a v
+        arestas_vizinhas_de_v = list(filter(lambda aresta: aresta[0] == v or aresta[1] == v, arestas))
 
-        if arestas_vizinhas_foram_visitadas(vertice, grafo.vizinhos(vertice + 1)):
-            return False, None
+        # se nao existir nenhuma aresta ligada a v, então não ha caminho de volta para t
+        # ou seja, nao se tem um ciclo euleriano
+        if not len(arestas_vizinhas_de_v):
+            return None
+
+        # escolhe arbitrariamente uma aresta de v e a remove das arestas
+        aresta_escolhida = random.choice(arestas_vizinhas_de_v)
+        arestas.remove(aresta_escolhida)
         
-        else:
-            aresta = seleciona_aresta_nao_visitada(arestas_visitadas)
-            arestas_visitadas[aresta] = True
-            vertice = aresta[1]
-            ciclo.append([vertice])
-
-        if vertice == vertice_tmp:
+        # pega o proximo vertice do ciclo
+        v = aresta_escolhida[0] if v == aresta_escolhida[1] else aresta_escolhida[1]
+        ciclo.append(v)
+        # Se o proximo vertice for o inicial, fechamos um ciclo euleriano
+        if v == t:
             break
+
+    # Aqui se faz a busca por subciclos
+    novo_ciclo = ciclo[:]
+    for i, vertice_ciclo in enumerate(ciclo):
+        for origem, _ in arestas:
+            # Se ha alguma aresta não visistada ligada ao ciclo, entao se faz a busca por um subciclo
+            if origem == vertice_ciclo:
+                subciclo = buscarSubcicloEuleriano(grafo, origem, arestas)
+                if not subciclo:
+                    return None
+                # insere o subciclo no meio do ciclo
+                novo_ciclo = novo_ciclo[:i] + subciclo + novo_ciclo[i + 1:]
+
+    return novo_ciclo
     
-    for vertice in vertices_do_ciclo_com_arestas_vizinhas_nao_visitadas(
-        grafo, ciclo, arestas_visitadas):
-        eh_ciclo_euleriano, ciclo_ = buscar_subciclo_euleriano(grafo, vertice, arestas_visitadas)
-        
-        if not eh_ciclo_euleriano:
-            return False, None
-        
-        ciclo[ciclo.index([vertice])] = ciclo_
 
-    return True, ciclo
+def hierholzer(grafo: Grafo):
+    # obtêm todas arestas sem repeticao ((1,2) == (2,1)),
+    # pois quando se visita a aresta (1,2) não é possível
+    # voltar pela (2,1) (vide definição de um ciclo euleriano)
+    arestas = grafo.obterArestasSemRepeticao()
+    v = random.choice(arestas)[0]
 
-def buscar_ciclo_euleriano(caminho_arquivo: str):
-    grafo = Grafo(caminho_arquivo)
-    arestas_visitadas: dict = {}
-    for aresta in grafo.arestas:
-        arestas_visitadas[(aresta.v1, aresta.v2)] = False
-
-    # Talvez alterar para selecionar aleatoriamente
-    vertice: int = grafo.arestas[0].v1
-
-    eh_ciclo_euleriano, ciclo = buscar_subciclo_euleriano(grafo, vertice, arestas_visitadas)
-
-    if eh_ciclo_euleriano:
-        print('1')
-        print(", ".join(str(item[0]) for item in ciclo))
-    else:
-        print('0')  
+    ciclo = buscarSubcicloEuleriano(grafo, v, arestas)
+    if not ciclo:
+        return None
+    
+    # vai excluindo as arestas da lista o algoritmo e se sobrar isso indica que tem aresta não visitada o que não deveria acontecer
+    if len(arestas):
+        return None
+            
+    return ciclo
 
 
+grafo = Grafo("arquivo.txt")
+ciclo_euleriano = hierholzer(grafo)
 
-buscar_ciclo_euleriano("arquivo.txt")
+if ciclo_euleriano:
+    print(f"1\n{', '.join(str(vertice) for vertice in ciclo_euleriano)}")
+else:
+    print("0")
