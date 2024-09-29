@@ -104,9 +104,8 @@ class Grafo:
     def obterArestasSemRepeticao(self):
         # Retorna todas as arestas do grafo, considerando que (3,4) é igual a (4,3)
         arestas = []
-        for l, vertice in enumerate(self.grafo):  # `vertice` é um objeto `Vertice`
-            for c, peso in enumerate(vertice.relacoes):  # Acessa as relações (pesos)
-                # Verifica se existe uma aresta entre l e c (peso != infinito)
+        for l, vertice in enumerate(self.grafo):  
+            for c, peso in enumerate(vertice.relacoes):  
                 if self.haAresta(l + 1, c + 1) and (c + 1, l + 1) not in arestas:
                     arestas.append((l + 1, c + 1))
         return arestas[:]
