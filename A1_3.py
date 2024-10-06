@@ -35,7 +35,15 @@ def buscarSubcicloEuleriano(grafo: Grafo, v: int, arestas: list) -> list:
     return novo_ciclo
     
 def hierholzer(grafo: Grafo):
-    arestas = grafo.obterArestasSemRepeticao()
+    def obterArestasSemRepeticao(grafo):
+        # Retorna todas as arestas do grafo, considerando que (3,4) é igual a (4,3)
+        arestas = []
+        for l, vertice in enumerate(grafo.grafo):  
+            for c, peso in enumerate(vertice.relacoes):  
+                if grafo.haAresta(l + 1, c + 1) and (c + 1, l + 1) not in arestas:
+                    arestas.append((l + 1, c + 1))
+        return arestas[:]
+    arestas = obterArestasSemRepeticao(grafo)
     v = random.choice(arestas)[0]
     ciclo = buscarSubcicloEuleriano(grafo, v, arestas)
 

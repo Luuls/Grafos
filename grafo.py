@@ -1,10 +1,5 @@
 from dataclasses import dataclass
 
-@dataclass
-class Aresta:
-    v1: int
-    v2: int
-    peso: float
 
 class Vertice:
     def __init__(self, rotulo: str, grau: int, relacoes: list[float]):
@@ -12,13 +7,13 @@ class Vertice:
         self.grau = grau
         self.relacoes = relacoes
         self.list_vizinhos: list[list[int]] = []
-        self.arestas: list[Aresta]
 
     def __str__(self) -> str:
         return str(self.relacoes)
 
     def __repr__(self) -> str:
         return self.__str__()
+
 
 class Grafo:
 
@@ -28,7 +23,6 @@ class Grafo:
         self.grafo: list[Vertice] = []
         self.qtd_arestas: int
         self.lista_vizinhos: list[list[int]]
-        self.arestas: list[Aresta] = []
         self.__ler_arquivo(caminho_arquivo)
 
     def qtdVertices(self) -> int:
@@ -53,9 +47,17 @@ class Grafo:
         return self.grafo[v1 - 1].relacoes[v2 - 1] != Grafo.nao_existe
 
     def __ler_arquivo(self, caminho_arquivo: str) -> None:
+        # para melhorar legibilidade
+        @dataclass
+        class Aresta:
+            v1: int
+            v2: int
+            peso: float
+
         with open(caminho_arquivo, 'r') as arquivo:
             tag = ""
             numero_de_vertices = 0
+            arestas: list[Aresta] = []
             rotulos: list[str] = []
             for linha in arquivo:
                 if "*vertices" in linha:
@@ -79,7 +81,7 @@ class Grafo:
                     vertice1 = int(vertice1)
                     vertice2 = int(vertice2)
                     peso = float(peso)
-                    self.arestas.append(Aresta(vertice1 - 1, vertice2 - 1, peso))
+                    arestas.append(Aresta(vertice1 - 1, vertice2 - 1, peso))
 
             for i in range(numero_de_vertices):
                 self.grafo.append(
@@ -89,7 +91,8 @@ class Grafo:
                         [Grafo.nao_existe for _ in range(numero_de_vertices)]
                     )
                 )
-            for aresta in self.arestas:
+
+            for aresta in arestas:
                 # opera simetricamente, pois o grafo é não-dirigido
                 self.grafo[aresta.v1] \
                     .relacoes[aresta.v2] = aresta.peso
@@ -99,21 +102,10 @@ class Grafo:
                 self.lista_vizinhos[aresta.v1].append(aresta.v2 + 1)
                 self.lista_vizinhos[aresta.v2].append(aresta.v1 + 1)
 
-            self.qtd_arestas = len(self.arestas)
+            self.qtd_arestas = len(arestas)
 
-    def obterArestasSemRepeticao(self):
-        # Retorna todas as arestas do grafo, considerando que (3,4) é igual a (4,3)
-        arestas = []
-        for l, vertice in enumerate(self.grafo):  
-            for c, peso in enumerate(vertice.relacoes):  
-                if self.haAresta(l + 1, c + 1) and (c + 1, l + 1) not in arestas:
-                    arestas.append((l + 1, c + 1))
-        return arestas[:]
-
-
-"""
 grafo = Grafo('arquivo.txt')
-print(grafo.obterArestasSemRepeticao())
+
 print(grafo.qtdVertices())
 print(grafo.qtdArestas())
 print(grafo.grau(1))
@@ -123,6 +115,6 @@ print(grafo.haAresta(1, 2))
 print(grafo.haAresta(2, 3))
 print(grafo.haAresta(3, 1))
 print(grafo.grafo)
+
 for i in range(grafo.qtdVertices()):
     print(grafo.rotulo(i + 1))
-"""
