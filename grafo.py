@@ -103,18 +103,3 @@ class Grafo:
                 self.lista_vizinhos[aresta.v2].append(aresta.v1 + 1)
 
             self.qtd_arestas = len(arestas)
-
-grafo = Grafo('arquivo.txt')
-
-print(grafo.qtdVertices())
-print(grafo.qtdArestas())
-print(grafo.grau(1))
-print(grafo.vizinhos(1))
-print(grafo.peso(1,2))
-print(grafo.haAresta(1, 2))
-print(grafo.haAresta(2, 3))
-print(grafo.haAresta(3, 1))
-print(grafo.grafo)
-
-for i in range(grafo.qtdVertices()):
-    print(grafo.rotulo(i + 1))
