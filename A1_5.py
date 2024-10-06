@@ -1,4 +1,4 @@
-from grafo import Grafo
+from A1_1 import Grafo
 
 
 def floyd_warshall(grafo: Grafo):

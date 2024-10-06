@@ -1,4 +1,4 @@
-from grafo import Grafo
+from A1_1 import Grafo
 
 def busca_em_largura(caminho_arquivo: str, vertice_s: int):
     grafo = Grafo(caminho_arquivo)

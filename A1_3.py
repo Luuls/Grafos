@@ -1,4 +1,4 @@
-from grafo import Grafo
+from A1_1 import Grafo
 import random
 
 def buscarSubcicloEuleriano(grafo: Grafo, v: int, arestas: list) -> list:        

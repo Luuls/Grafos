@@ -1,4 +1,4 @@
-from grafo import Grafo
+from A1_1 import Grafo
 import heapq
 
 def dijkstra(grafo: Grafo, inicio: int):
