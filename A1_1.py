@@ -6,7 +6,6 @@ class Vertice:
         self.rotulo = rotulo
         self.grau = grau
         self.relacoes = relacoes
-        self.list_vizinhos: list = []
 
     def __str__(self) -> str:
         return str(self.relacoes)
