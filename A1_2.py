@@ -1,32 +1,51 @@
+from collections import deque
 from A1_1 import Grafo
+import sys
 
-def busca_em_largura(caminho_arquivo: str, vertice_s: int):
-    grafo = Grafo(caminho_arquivo)
-    vertice_info = {}
+def busca_em_largura(grafo, vertice_inicial) -> None:
+    # Lista para marcar os vértices visitados
+    visitado = [False] * grafo.qtdVertices()
     
-    for i in range(grafo.qtdVertices()):
-        vertice_info[i+1] = [False, float('inf'), None, i+1]
+    # Fila para processar os vértices
+    fila = deque([vertice_inicial])
     
-    vertice_info[vertice_s][0] = True
-    vertice_info[vertice_s][1] = 0
+    # Inicialmente, o vértice inicial foi visitado
+    visitado[vertice_inicial - 1] = True
+    
+    # Nível atual
+    nivel_atual = 0
+    
+    # Dicionário para armazenar os vértices por nível
+    niveis = {nivel_atual: [vertice_inicial]}
 
-    fila = [vertice_info[vertice_s]]
+    while fila:
+        # Número de vértices no nível atual
+        num_vertices_nivel = len(fila)
+        
+        # Lista para armazenar os vértices do próximo nível
+        proximos_vertices = []
 
-    while len(fila) != 0:
-        u = fila.pop()
-        for neighbor in grafo.vizinhos(u[3]):
-            if vertice_info[neighbor][0] == False:
-                vertice_info[neighbor][0] = True
-                vertice_info[neighbor][1] = u[1] + 1
-                vertice_info[neighbor][2] = u
-                fila.append(vertice_info[neighbor])
-    
-    d = [[] for i in range(grafo.qtdVertices())]
-    for info in vertice_info.values():
-        d[info[1]].append(info[3])
-    
-    for i in range(len(d)):
-        if d[i]:
-            print(f"{i}: {', '.join(map(str, d[i]))}")
+        # Processa todos os vértices do nível atual
+        for _ in range(num_vertices_nivel):
+            vertice = fila.popleft()
+            
+            # Percorre os vizinhos do vértice atual
+            for vizinho in grafo.vizinhos(vertice):
+                if not visitado[vizinho - 1]:
+                    visitado[vizinho - 1] = True
+                    fila.append(vizinho)
+                    proximos_vertices.append(vizinho)
 
-busca_em_largura('arquivo.txt', 1)
+        # Incrementa o nível se houver novos vértices para processar
+        if proximos_vertices:
+            nivel_atual += 1
+            niveis[nivel_atual] = proximos_vertices
+    
+    # Impressão dos níveis e seus vértices
+    for nivel, vertices in niveis.items():
+        print(f"{nivel}: {','.join(map(str, vertices))}")
+
+def main():
+    busca_em_largura(Grafo(sys.argv[1]), int(sys.argv[2]))
+
+main()

@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-
+import re
 
 class Vertice:
-    def __init__(self, rotulo: str, grau: int, relacoes: list[float]):
+    def __init__(self, rotulo: str, grau: int, relacoes: list):
         self.rotulo = rotulo
         self.grau = grau
         self.relacoes = relacoes
-        self.list_vizinhos: list[list[int]] = []
+        self.list_vizinhos: list = []
 
     def __str__(self) -> str:
         return str(self.relacoes)
@@ -20,9 +20,9 @@ class Grafo:
     nao_existe = float('inf')
 
     def __init__(self, caminho_arquivo: str) -> None:
-        self.grafo: list[Vertice] = []
+        self.grafo: list = []
         self.qtd_arestas: int
-        self.lista_vizinhos: list[list[int]]
+        self.lista_vizinhos: list
         self.__ler_arquivo(caminho_arquivo)
 
     def qtdVertices(self) -> int:
@@ -37,7 +37,7 @@ class Grafo:
     def rotulo(self, vertice: int) -> str:
         return self.grafo[vertice - 1].rotulo
 
-    def vizinhos(self, vertice: int) -> list[int]:
+    def vizinhos(self, vertice: int) -> list:
         return self.lista_vizinhos[vertice - 1]
 
     def peso(self, v1: int, v2: int) -> float:
@@ -57,8 +57,8 @@ class Grafo:
         with open(caminho_arquivo, 'r') as arquivo:
             tag = ""
             numero_de_vertices = 0
-            arestas: list[Aresta] = []
-            rotulos: list[str] = []
+            arestas: list = []
+            rotulos: list = []
             for linha in arquivo:
                 if "*vertices" in linha:
                     tag = "vertices"
@@ -72,17 +72,28 @@ class Grafo:
                     tag = "edges"
 
                 elif tag == "vertices":
-                    indice, rotulo = linha.split()
-                    indice = int(indice)
-                    rotulos[indice - 1] = rotulo
+                    # Verifica se a linha contém um rótulo entre aspas
+                    if '"' in linha:
+                        # Usamos uma expressão regular para separar o índice e o rótulo entre aspas
+                        match = re.match(r'(\d+)\s+"(.*)"', linha)
+                        if match:
+                            indice = int(match.group(1))
+                            rotulo = match.group(2)
+                            rotulos[indice - 1] = rotulo
+                    else:
+                        # Caso contrário, considera o segundo valor como o rótulo numérico
+                        indice, rotulo = linha.split()
+                        rotulos[int(indice) - 1] = rotulo
 
                 elif tag == "edges":
-                    vertice1, vertice2, peso = linha.split()
-                    vertice1 = int(vertice1)
-                    vertice2 = int(vertice2)
-                    peso = float(peso)
-                    arestas.append(Aresta(vertice1 - 1, vertice2 - 1, peso))
-
+                    try:
+                        vertice1, vertice2, peso = linha.split()
+                        vertice1 = int(vertice1)
+                        vertice2 = int(vertice2)
+                        peso = float(peso)
+                        arestas.append(Aresta(vertice1 - 1, vertice2 - 1, peso))
+                    except:
+                        pass
             for i in range(numero_de_vertices):
                 self.grafo.append(
                     Vertice(

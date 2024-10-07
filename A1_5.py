@@ -1,5 +1,5 @@
 from A1_1 import Grafo
-
+import sys
 
 def floyd_warshall(grafo: Grafo):
     # Número de vértices
@@ -31,8 +31,9 @@ def imprimir_matriz_distancias(distancias):
         linha += ",".join(str(int(dist)) if dist != Grafo.nao_existe else "inf" for dist in distancias[i])
         print(linha)
 
-# Exemplo de uso
-# Assumindo que o arquivo do grafo esteja no caminho "grafo.txt"
-grafo = Grafo("grafo.txt")
-distancias = floyd_warshall(grafo)
-imprimir_matriz_distancias(distancias)
+def main():
+    grafo = Grafo(sys.argv[1])
+    distancias = floyd_warshall(grafo)
+    imprimir_matriz_distancias(distancias)
+
+main()
