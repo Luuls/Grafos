@@ -22,6 +22,7 @@ class Grafo:
         self.grafo: list = []
         self.qtd_arestas: int
         self.lista_vizinhos: list
+        self.dirigido: bool = False
         self.__ler_arquivo(caminho_arquivo)
 
     def qtdVertices(self) -> int:
@@ -44,6 +45,16 @@ class Grafo:
 
     def haAresta(self, v1: int, v2: int) -> bool:
         return self.grafo[v1 - 1].relacoes[v2 - 1] != Grafo.nao_existe
+
+    def transpor(self):
+        grafo_transposto = [[] for _ in range(self.qtdVertices())]
+        for v in range(self.qtdVertices()):
+            for vizinho in self.vizinhos(v + 1):
+                grafo_transposto[vizinho - 1].append(v + 1)
+        self.lista_vizinhos = grafo_transposto
+
+    def vizinhos_transposto(self, vertice: int) -> list:
+        return self.lista_vizinhos[vertice - 1]
 
     def __ler_arquivo(self, caminho_arquivo: str) -> None:
         # para melhorar legibilidade
@@ -69,6 +80,11 @@ class Grafo:
 
                 elif "*edges" in linha:
                     tag = "edges"
+                    self.dirigido = False
+
+                elif "*arcs" in linha:
+                    tag = "arcs"
+                    self.dirigido = True
 
                 elif tag == "vertices":
                     # Verifica se a linha contém um rótulo entre aspas
@@ -84,7 +100,7 @@ class Grafo:
                         indice, rotulo = linha.split()
                         rotulos[int(indice) - 1] = rotulo
 
-                elif tag == "edges":
+                elif tag in ["edges", "arcs"]:
                     try:
                         vertice1, vertice2, peso = linha.split()
                         vertice1 = int(vertice1)
@@ -93,6 +109,7 @@ class Grafo:
                         arestas.append(Aresta(vertice1 - 1, vertice2 - 1, peso))
                     except:
                         pass
+
             for i in range(numero_de_vertices):
                 self.grafo.append(
                     Vertice(
@@ -103,13 +120,10 @@ class Grafo:
                 )
 
             for aresta in arestas:
-                # opera simetricamente, pois o grafo é não-dirigido
-                self.grafo[aresta.v1] \
-                    .relacoes[aresta.v2] = aresta.peso
-                self.grafo[aresta.v2] \
-                    .relacoes[aresta.v1] = aresta.peso
-
+                self.grafo[aresta.v1].relacoes[aresta.v2] = aresta.peso
                 self.lista_vizinhos[aresta.v1].append(aresta.v2 + 1)
-                self.lista_vizinhos[aresta.v2].append(aresta.v1 + 1)
+                if not self.dirigido:
+                    self.grafo[aresta.v2].relacoes[aresta.v1] = aresta.peso
+                    self.lista_vizinhos[aresta.v2].append(aresta.v1 + 1)
 
             self.qtd_arestas = len(arestas)

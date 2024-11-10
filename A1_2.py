@@ -40,12 +40,14 @@ def busca_em_largura(grafo, vertice_inicial) -> None:
         if proximos_vertices:
             nivel_atual += 1
             niveis[nivel_atual] = proximos_vertices
-    
-    # Impressão dos níveis e seus vértices
-    for nivel, vertices in niveis.items():
-        print(f"{nivel}: {','.join(map(str, vertices))}")
+
+    return niveis
 
 def main():
-    busca_em_largura(Grafo(sys.argv[1]), int(sys.argv[2]))
+    grafo = Grafo(sys.argv[1])
+    vertice_inicial = int(sys.argv[2])
+    arvore = busca_em_largura(grafo, vertice_inicial)
+    for vertice, vizinhos in arvore.items():
+        print(f"{vertice}: {','.join(map(str, vizinhos))}")
 
 main()
