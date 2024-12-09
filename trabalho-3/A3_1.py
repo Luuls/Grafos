@@ -1,56 +1,78 @@
+from collections import deque
 from A1_1 import Grafo
+import sys
 
-def edmonds_karp(grafo, source, sink):
-    from collections import deque
+# Supondo que a classe Grafo esteja definida conforme fornecido anteriormente
 
+def edmond_karp(grafo: Grafo, s: int, t: int) -> float:
+    # Número de vértices
     n = grafo.qtdVertices()
-    parent = [-1] * n
-    max_flow = 0
+    
+    # Cria o grafo residual a partir das capacidades do grafo original
+    # Se não houver aresta (valor = infinito no grafo original), capacidade = 0
+    capacidade_residual = [[0] * n for _ in range(n)]
+    for u in range(n):
+        for v in range(n):
+            peso = grafo.grafo[u].relacoes[v]
+            if peso != float('inf'):
+                capacidade_residual[u][v] = peso
+    
+    fluxo_maximo = 0.0
 
-    def bfs(s, t):
-        visited = [False] * n
-        queue = deque()
-        queue.append(s)
-        visited[s] = True
-        while queue:
-            u = queue.popleft()
+    while True:
+        # Busca em Largura (BFS) para encontrar um caminho aumentante no grafo residual
+        # parent[u] irá guardar o antecessor de u no caminho encontrado pela BFS
+        parent = [-1] * n
+        parent[s - 1] = -2  # Marca o vértice fonte (s) como visitado
+        fila = deque()
+        fila.append((s - 1, Grafo.nao_existe))  # (vértice, fluxo disponível até esse vértice)
+
+        caminho_encontrado = False
+        while fila:
+            u, fluxo_atual = fila.popleft()
             for v in range(n):
-                if not visited[v] and grafo.grafo[u].relacoes[v] > 0:
-                    queue.append(v)
-                    visited[v] = True
+                # Se a capacidade residual é > 0 e o vértice ainda não foi visitado
+                if capacidade_residual[u][v] > 0 and parent[v] == -1:
                     parent[v] = u
-                    if v == t:
-                        return True
-        return False
+                    # O fluxo até v será o mínimo entre o fluxo atual e a capacidade residual da aresta u->v
+                    novo_fluxo = min(fluxo_atual, capacidade_residual[u][v])
+                    if v == t - 1:
+                        # Chegamos em t, atualizamos fluxo_maximo
+                        fluxo_maximo += novo_fluxo
+                        # Atualiza as capacidades residuais ao longo do caminho
+                        w = v
+                        while w != s - 1:
+                            u_pai = parent[w]
+                            capacidade_residual[u_pai][w] -= novo_fluxo
+                            capacidade_residual[w][u_pai] += novo_fluxo
+                            w = u_pai
+                        caminho_encontrado = True
+                        break
+                    fila.append((v, novo_fluxo))
+            if caminho_encontrado:
+                break
+        
+        if not caminho_encontrado:
+            # Não há mais caminho aumentante
+            break
 
-    while bfs(source, sink):
-        path_flow = float('inf')
-        s = sink
-        while s != source:
-            path_flow = min(path_flow, grafo.grafo[parent[s]].relacoes[s])
-            s = parent[s]
-        max_flow += path_flow
-        v = sink
-        while v != source:
-            u = parent[v]
-            grafo.grafo[u].relacoes[v] -= path_flow
-            grafo.grafo[v].relacoes[u] += path_flow
-            v = parent[v]
-    return max_flow
+    return fluxo_maximo
 
-if __name__ == '__main__':
-    import sys
-    if len(sys.argv) != 4:
-        print(f"Uso: python {sys.argv[0]} <arquivo_grafo> <vertice_origem> <vertice_destino>")
+
+if __name__ == "__main__":
+    # Exemplo de execução
+    # Suponhamos que o caminho do arquivo seja passado como argumento na linha de comando
+    # e s e t também.
+    # Ex: python3 programa.py caminho_do_arquivo_grafo.txt 1 4
+    if len(sys.argv) < 4:
+        print("Uso: python3 programa.py <caminho_arquivo> <s> <t>")
         sys.exit(1)
 
-    arquivo_grafo = sys.argv[1]
-    vertice_origem = int(sys.argv[2]) - 1
-    vertice_destino = int(sys.argv[3]) - 1
+    caminho_arquivo = sys.argv[1]
+    s = int(sys.argv[2])
+    t = int(sys.argv[3])
 
-    grafo = Grafo(arquivo_grafo)
-    max_flow = edmonds_karp(grafo, vertice_origem, vertice_destino)
-    if max_flow == float('inf'):
-        print("O fluxo máximo é infinito.")
-    else:
-        print(int(max_flow))
+    grafo = Grafo(caminho_arquivo)
+    resultado = edmond_karp(grafo, s, t)
+    print(int(resultado))  # Imprime o fluxo máximo encontrado
+
